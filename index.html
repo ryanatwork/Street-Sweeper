@@ -1,0 +1,96 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd"> 
+<html> 
+  <head> 
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=7,IE=9" />
+    <!--The viewport meta tag is used to improve the presentation and behavior of the samples 
+      on iOS devices-->
+    <meta name="viewport" content="initial-scale=1, maximum-scale=1,user-scalable=no"/>
+    <title>Map with legend</title> 
+    <link rel="stylesheet" type="text/css" href="http://serverapi.arcgisonline.com/jsapi/arcgis/2.3/js/dojo/dijit/themes/claro/claro.css"> 
+    <style> 
+      html, body { height: 98%; width: 98%; margin: 0; padding: 5px; }
+      #rightPane{
+        width:20%;
+      }
+      #legendPane{
+        border: solid #97DCF2 1px;
+      }
+     
+    </style> 
+    <script type="text/javascript">var djConfig = {parseOnLoad: true};</script> 
+    <script type="text/javascript" src="http://serverapi.arcgisonline.com/jsapi/arcgis/?v=2.3"></script> 
+    <script type="text/javascript"> 
+      dojo.require("dijit.layout.BorderContainer");
+      dojo.require("dijit.layout.ContentPane");
+      dojo.require("dijit.layout.AccordionContainer");
+      dojo.require("esri.map");
+      dojo.require("esri.dijit.Legend");
+      dojo.require("esri.layers.FeatureLayer");
+      
+      var map;
+
+
+      function init() {
+        var initialExtent = new esri.geometry.Extent({"xmin":-13204441.135492312,"ymin":4083458.830749193,"xmax":-13180611.891924439,"ymax":4089172.4986135024,"spatialReference":{"wkid":102100}});
+        map = new esri.Map("map", { extent: initialExtent});
+        //Add the terrain service to the map. View the ArcGIS Online site for services http://arcgisonline/home/search.html?t=content&f=typekeywords:service    
+        var basemap = new esri.layers.ArcGISTiledMapServiceLayer("http://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer");
+        map.addLayer(basemap);
+
+        var trails = new esri.layers.FeatureLayer("http://eos2/ArcGIS/rest/services/Public_Works/AGS_sweep/MapServer/0", {
+          opacity:0.8,
+		  mode: esri.layers.FeatureLayer.MODE_ONDEMAND,
+          outFields: ["*"]
+        });
+    
+        
+        //add the legend
+        dojo.connect(map,'onLayersAddResult',function(results){
+          var layerInfo = dojo.map(results, function(layer,index){
+            return {layer:layer.layer,title:layer.layer.name};
+          });
+          if(layerInfo.length > 0){
+            var legendDijit = new esri.dijit.Legend({
+              map:map,
+              layerInfos:layerInfo
+            },"legendDiv");
+            legendDijit.startup();
+          }
+        });
+        
+        map.addLayers([trails]);
+
+        //resize the map when the browser resizes - view the 'Resizing and repositioning the map' section in 
+        //the following help topic for more details http://help.esri.com/EN/webapi/javascript/arcgis/help/jshelp_start.htm#jshelp/inside_guidelines.htm
+        var resizeTimer;
+        dojo.connect(map, 'onLoad', function(theMap) {
+          dojo.connect(dijit.byId('map'), 'resize', function() {  //resize the map if the div is resized
+            clearTimeout(resizeTimer);
+            resizeTimer = setTimeout( function() {
+              map.resize();
+              map.reposition();
+            }, 500);
+          });
+        });
+      }
+
+      dojo.addOnLoad(init);
+    </script> 
+  </head> 
+  
+  <body class="claro"> 
+    <div id="content" dojotype="dijit.layout.BorderContainer" design="headline" gutters="true" style="width: 100%; height: 100%; margin: 0;"> 
+      <div id="rightPane" dojotype="dijit.layout.ContentPane" region="right">
+        <div dojoType="dijit.layout.AccordionContainer">
+          <div dojoType="dijit.layout.ContentPane" id="legendPane" title="Legend" selected="true" >
+            <div id="legendDiv"></div>
+          </div>
+        </div>
+      </div>
+      <div id="map" dojotype="dijit.layout.ContentPane" region="center" style="overflow:hidden;"> 
+      </div> 
+    </div> 
+  </body> 
+
+</html>
