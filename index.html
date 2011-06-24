@@ -38,11 +38,11 @@
         var basemap = new esri.layers.ArcGISTiledMapServiceLayer("http://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer");
         map.addLayer(basemap);
 
-        var trails = new esri.layers.FeatureLayer("http://eos2/ArcGIS/rest/services/Public_Works/AGS_sweep/MapServer/0", {
-          opacity:0.8,
-		  mode: esri.layers.FeatureLayer.MODE_ONDEMAND,
+        var residential = new esri.layers.ArcGISDynamicMapServiceLayer("http://eos2/ArcGIS/rest/services/Public_Works/AGS_sweep2/MapServer", {
+          mode: esri.layers.FeatureLayer.MODE_ONDEMAND,
           outFields: ["*"]
         });
+
     
         
         //add the legend
@@ -59,7 +59,7 @@
           }
         });
         
-        map.addLayers([trails]);
+        map.addLayers([residential]);
 
         //resize the map when the browser resizes - view the 'Resizing and repositioning the map' section in 
         //the following help topic for more details http://help.esri.com/EN/webapi/javascript/arcgis/help/jshelp_start.htm#jshelp/inside_guidelines.htm
